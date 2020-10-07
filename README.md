@@ -280,6 +280,8 @@ Point a browser to the API endpoint, in our case, http://127.0.0.1:8200. Use the
 
 ## Running the Hashicorp vault container image
 
+The IPC_LOCK is a feature in the linux kernel that allows a process to lock the memory segment it uses from other processes. This is a security enhancement as other "non-vault" processes cannot snoop into the secrets the vault may store in the memory.
+
 `docker run --cap-add=IPC_LOCK -e VAULT_ADDR=http://127.0.0.1:8200 -d --hostname vault --name vault vault:latest`
 
 ## Getting the vault's authentication strings
@@ -352,7 +354,50 @@ REST Call
 
 # DYNAMIC SECRETS DEMO
 
-## Starting the vault
+## Setting up the PostGreSQL container
+The idea of doing these changes in the SQL server is to enable the management of the instance by Vault and therefore users need not have lasting access to the server. This is the enablement of the just-in-time access management. Any further access control (just-enough-access [JEA]) can be done in the vault end. 
+
+### Creating a role for the vault
+In order for the vault to access the PostGres instance, we need to create an account for the vault. This will be the only lasting account and will only have the authorizations to create roles and no access will be granted to any tables or databases.
+
+Run the following command to create the `demo_hashicorp_vault` user. 
+
+```
+CREATE ROLE "demo_hashicorp_vault" WITH CREATEROLE LOGIN ENCRYPTED PASSWORD '<a_really_complex_password>' NOINHERIT;
+CREATE ROLE
+```
+
+**This password will be stored in the vault and therefore it needs to be kept safe till the vault configurations are completed.**
+
+### Creating the role for users
+This is the template role that will be granted access to the databases and tables in the instance. This role does not have the capability to login to the instance but role entitlements can be derived from this role.
+
+```
+CREATE ROLE "ro" NOINHERIT;
+CREATE ROLE
+```
+
+### Graning the role access to the resources
+This task is crucial and needs to have a bit of thought put in. In this demo, we are granting only SELECT access to the role across all tables in the *public* schema.
+
+```
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO "ro";
+GRANT
+```
+
+### Create sample tables
+For good measure, we will create a couple of dummy tables
+
+```
+CREATE TABLE "DateTable" ("EntryDate" date not null default now());
+CREATE TABLE
+
+INSERT INTO "DateTable" ("EntryDate") VALUES ('2020-10-01'),('2020-10-02'),('2020-10-03'),('2020-10-04');
+INSERT 0 4
+```
+
+
+## Starting the vault conainer
 You may start the vault in developement mode or production mode for this exercise.
 
 ## Setting up the vault environment for PostGreSQL DB
@@ -376,3 +421,4 @@ EOF`
 ### Create a temporary connection
 
 `vault read database/creds/readonly`
+
