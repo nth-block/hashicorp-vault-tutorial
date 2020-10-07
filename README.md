@@ -400,6 +400,13 @@ INSERT 0 4
 ## Starting the vault conainer
 You may start the vault in developement mode or production mode for this exercise.
 
+## Enable the database secrets provider
+
+```
+vault secrets enable database
+Success! Enabled the database secrets engine at: database/
+```
+
 ## Setting up the vault environment for PostGreSQL DB
 ### Create the database configuration
 `vault write database/config/postgresql \
