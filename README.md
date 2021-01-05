@@ -284,6 +284,10 @@ The IPC_LOCK is a feature in the linux kernel that allows a process to lock the 
 
 `docker run --cap-add=IPC_LOCK -e VAULT_ADDR=http://127.0.0.1:8200 -d --hostname vault --name vault vault:latest`
 
+The previous command starts the vault in *development* mode. In case you need to start the vault in the production mode, use the next command to start the docker container in production mode
+
+`docker run -d --name vault --hostname vault -v /path/to/config/directory/:/vault/config/:ro --cap-add=IPC_LOCK -e VAULT_ADDR=http://127.0.0.1:8200 -p 8200:8200 --entrypoint="/bin/vault" vault:latest server -config=/vault/config/config.hcl` 
+
 ## Getting the vault's authentication strings
 
 `docker container logs vault`
