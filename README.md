@@ -336,7 +336,9 @@ You may start the vault in developement mode or production mode for this exercis
 ` vault secrets list`
 
 ## Create a new secrets path
-`vault secrets enable --path <secrets_path_name>` 
+`vault secrets enable --path <secrets_path> <engine_name>` 
+
+
 
 ## List all secrets in a path
 `vault kv list <secrets_path>`
