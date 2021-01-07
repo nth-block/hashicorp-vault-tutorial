@@ -278,6 +278,13 @@ Point a browser to the API endpoint, in our case, http://127.0.0.1:8200. Use the
 
 # Setting up Dockerised the demo environments
 
+## Fetching the Hashicorp Vault container image
+
+Docker Hub has the community vault image in the following repo https://hub.docker.com/r/hashicorp/vault and the image can be pulled using the `docker pull hashicorp/vault` command to pull the image with the `latest` tag in it.
+
+> For the commands below to work you will have to rename/retag the image name. Use the following command to get achieve this.
+> `docker image tag hashicorp/vault:latest vault:latest`
+
 ## Running the Hashicorp vault container image
 
 The IPC_LOCK is a feature in the linux kernel that allows a process to lock the memory segment it uses from other processes. This is a security enhancement as other "non-vault" processes cannot snoop into the secrets the vault may store in the memory.
