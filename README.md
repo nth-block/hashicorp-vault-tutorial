@@ -409,6 +409,8 @@ INSERT INTO "DateTable" ("EntryDate") VALUES ('2020-10-01'),('2020-10-02'),('202
 INSERT 0 4
 ```
 
+> If you want to play aroud a little deeper and need a database that mimics that of an actual application, try the sample DVD Rental PostgreSQL DB from https://www.postgresqltutorial.com/postgresql-sample-database/
+
 
 ## Starting the vault container
 You may start the vault in developement mode or production mode for this exercise.
@@ -422,21 +424,26 @@ Success! Enabled the database secrets engine at: database/
 
 ## Setting up the vault environment for PostGreSQL DB
 ### Create the database configuration
-`vault write database/config/postgresql \
+```
+vault write database/config/postgresql \
     plugin_name=postgresql-database-plugin \
     connection_url="postgresql://{{username}}:{{password}}@localhost:5432/postgres?sslmode=disable" \
     allowed_roles=readonly \
     username="postgres" \
-    password="mysecretpassword"`
+    password="mysecretpassword"
+```
 
 ### Create the SQL commands file for DB policy
-`tee readonly.sql <<EOF
+
+```
+tee readonly.sql <<EOF
 CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' INHERIT;
 GRANT ro TO "{{name}}";
-EOF`
+EOF
+```
 
 ### Create the DB policy
-` vault write database/roles/readonly db_name=postgresql creation_statements=@readonly.sql default_ttl=15m max_ttl=20m` 
+`vault write database/roles/readonly db_name=postgresql creation_statements=@readonly.sql default_ttl=15m max_ttl=20m` 
 
 ### Create a temporary connection
 
