@@ -410,7 +410,7 @@ INSERT 0 4
 ```
 
 
-## Starting the vault conainer
+## Starting the vault container
 You may start the vault in developement mode or production mode for this exercise.
 
 ## Enable the database secrets provider
