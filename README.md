@@ -423,17 +423,22 @@ Success! Enabled the database secrets engine at: database/
 ```
 
 ## Setting up the vault environment for PostGreSQL DB
+
 ### Create the database configuration
+
+Replace the username, password and the server URL in the command below before executing the statement
+
 ```
 vault write database/config/postgresql \
     plugin_name=postgresql-database-plugin \
     connection_url="postgresql://{{username}}:{{password}}@localhost:5432/postgres?sslmode=disable" \
-    allowed_roles=readonly \
-    username="postgres" \
-    password="mysecretpassword"
+    allowed_roles=ro \
+    username="demo_hashicorp_vault" \
+    password="<a_really_complex_password>"
 ```
 
 ### Create the SQL commands file for DB policy
+
 
 ```
 tee readonly.sql <<EOF
