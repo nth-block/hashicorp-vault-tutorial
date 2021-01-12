@@ -437,8 +437,11 @@ vault write database/config/postgresql \
     password="<a_really_complex_password>"
 ```
 
-### Create the SQL commands file for DB policy
+> In case you are running the vault and/or the Postgres SQL in a container, be sure to use the IP address/DNS name of the container!
 
+> The DB to connect to create the user must always be `postgres` as in PostgreSQL that is where users are managed.
+
+### Create the SQL commands file for DB policy
 
 ```
 tee readonly.sql <<EOF
@@ -450,7 +453,54 @@ EOF
 ### Create the DB policy
 `vault write database/roles/readonly db_name=postgresql creation_statements=@readonly.sql default_ttl=15m max_ttl=20m` 
 
+> Here the DB name must be from the path used in config `database/config/ppostgresql`
+
 ### Create a temporary connection
 
 `vault read database/creds/readonly`
 
+```
+Key                Value
+---                -----
+lease_id           database/creds/ro/wYy10FICBGCYIeYCb697Q9fb
+lease_duration     15m
+lease_renewable    true
+password           68toirX9JpUfa3GH--QU
+username           v-root-ro-eHrSnIDuAbX1Pw1Vki9K-1610477306
+```
+
+### Connect using the temoporary connection
+
+Execute the following command (needs psql client to be installed)
+
+`psql -U <username_from_above> -d dvdrental -h <servername_container_name _or_ip> -W`
+
+> The `-W` will force the entry of the password. Enter the password from the step above at the prompt.
+
+```
+$ psql -U v-root-ro-eHrSnIDuAbX1Pw1Vki9K-1610477306  -d dvdrental -h 127.0.0.1 -W
+Password: 
+psql (12.5 (Ubuntu 12.5-0ubuntu0.20.04.1), server 13.1)
+WARNING: psql major version 12, server major version 13.
+         Some psql features might not work.
+Type "help" for help.
+
+dvdrental=> \du+
+                                                          List of roles
+                 Role name                 |                         Attributes                         | Member of | Description 
+-------------------------------------------+------------------------------------------------------------+-----------+-------------
+ demo_hashicorp_vault                      | No inheritance, Create role                                | {}        | 
+ postgres                                  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}        | 
+ ro                                        | No inheritance, Cannot login                               | {}        | 
+ v-root-ro-J0xZeTpFQIPl7dJNKPaM-1610477189 | Password valid until 2021-01-12 19:01:34+00                | {ro}      | 
+ v-root-ro-eHrSnIDuAbX1Pw1Vki9K-1610477306 | Password valid until 2021-01-12 19:03:31+00                | {ro}      | 
+ v-root-ro-iHg2ozLz1Lzy1fzxzKkb-1610477307 | Password valid until 2021-01-12 19:03:32+00                | {ro}      | 
+
+dvdrental=> select now();
+              now              
+-------------------------------
+ 2021-01-12 18:51:44.844303+00
+(1 row)
+```
+
+Since we had configured a default ttl of 15m in the *policy*, we get a token valid for 15 minutes. After the 15 minutes, the vault will delete the accounts in the DB using the credentials stored within it.
