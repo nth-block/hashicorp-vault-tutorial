@@ -1,3 +1,7 @@
+> A cyber security friend pointed out that I have left some security critical date in this repo.
+> This was a demo vault and they're long sobe dead after authoring this repo.
+> TODO: I will however mark out the lines that must be treated with caution in a real deployment. While the Hashicorp documentation contains all the pointers, one more won't hurt right :)
+
 # Starting the vault
 
 ## Development mode
